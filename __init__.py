@@ -7,9 +7,10 @@ def updateField(field):
     p_3 = float(input("Input probability for plants(3): "))
     length = len(field)
     p = (p_0, p_1, p_2, p_3)
+    if(p[-1] >= 1):
+        raise ValueError('Plants probability more or equal to 1')
     if(not math.isclose(sum(p[:-1]), 1.0)):
         raise ValueError('Distribution for First three probabilities')
-    x = random.randrange(0, length-1)
-    y = random.randrange(0, len(field[length -1]))
-    field[x][y] = random.choices([0, 1, 2 ,3], [p_0, p_1, p_2, p_3])[0]
-    
+    for i in range(len(field)):
+        for j in range(len(field[i])):
+            field[i][j] = random.choices([0, 1, 2 ,3], p)[0]
