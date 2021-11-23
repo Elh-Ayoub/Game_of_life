@@ -18,6 +18,8 @@ def read_csv():
 field = read_csv()
 
 iterations = int(input("Input number of iterations: "))
+if(iterations < 0):
+    raise ValueError("Iterations must be positive")
 g_0 = float(input("Input probability of empty cells(0): "))
 g_3 = float(input("Input probability of Plants(3): "))
 
