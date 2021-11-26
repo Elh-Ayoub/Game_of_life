@@ -1,11 +1,19 @@
+import csv
+
 class Herbivore:
 
     dead = True
-    x = None
-    y = None
 
     def __init__(self):
-        self.dead = False
+        with open('symbols.csv','r') as my_csv:
+            csvreader = csv.reader(my_csv, delimiter=',')
+            for row in csvreader:
+                if(row != []):
+                    herbivores_symbol = row[0]
+            self.dead = False
+            self.symbol = herbivores_symbol if(herbivores_symbol != '') else "1"
+    def __str__(self):
+        return self.symbol
     def isDead(self):
         return self.dead
     def kill(self):

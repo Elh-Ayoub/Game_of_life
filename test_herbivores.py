@@ -1,7 +1,7 @@
 import unittest
 from herbivores import Herbivore
 
-class TestInit(unittest.TestCase):
+class TestHerbivore(unittest.TestCase):
     herbivore = Herbivore()
     def test(self):
         self.assertRaises(TypeError, Herbivore, True)

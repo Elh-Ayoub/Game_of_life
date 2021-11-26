@@ -1,7 +1,7 @@
 import unittest
 from plants import Plant
 
-class TestInit(unittest.TestCase):
+class TestPlant(unittest.TestCase):
     plant = Plant()
     def test(self):
         self.assertRaises(TypeError, Plant, True)

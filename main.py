@@ -2,6 +2,24 @@ import random
 import csv
 import math
 import time
+from plants import Plant
+from herbivores import Herbivore
+from animals import Animal
+from visualizer import Visualizer
+
+
+iterations = int(input("Input number of iterations: "))
+if(iterations < 0):
+    raise ValueError("Iterations must be positive")
+g_0 = float(input("Input probability of empty cells(0): "))
+g_3 = float(input("Input probability of Plants(3): "))
+with open('symbols.csv','r') as my_csv:
+        csvreader = csv.reader(my_csv, delimiter=',')
+        for row in csvreader:
+            if(row != []):
+                herbivores_symbol = row[0]
+                animals_symbol = row[1]
+                plants_symbol = row[2]
 
 def read_csv():
     field = []
@@ -12,45 +30,41 @@ def read_csv():
             if(row != []):
                 field.append([])
                 for ele in row:
-                    field[i].append(int(ele))
+                    if((ele) == '0'): field[i].append(0)
+                    elif((ele) == herbivores_symbol): field[i].append(Herbivore())
+                    elif((ele) == animals_symbol): field[i].append(Animal())
+                    elif((ele) == plants_symbol): field[i].append(Plant())
                 i += 1
     return field
 field = read_csv()
-
-iterations = int(input("Input number of iterations: "))
-if(iterations < 0):
-    raise ValueError("Iterations must be positive")
-g_0 = float(input("Input probability of empty cells(0): "))
-g_3 = float(input("Input probability of Plants(3): "))
-
+v = Visualizer()
 g = (g_0, g_3)
 if(not math.isclose(sum(g[:]), 1.0)):
     raise ValueError('Distribution must be exact for these probabilities')
 
 def exec_iteration(field, iterations, g):
+    v.clear()
     for i in range(iterations):
         field = exec_rand(field, g, i+1)
         print_iter(field, i)
-    with open('board.csv','w+') as my_csv:
-        csvWriter = csv.writer(my_csv, delimiter=',')
-        csvWriter.writerows(field)
+
     return 0
 
 def exec_rand(field, g, iterations):
     for i in range(len(field)):
         for j in range(len(field[i])):
-            if(field[i][j] == 0 or field[i][j] == 3):
-                x = random.choices([0, 3], g)[0]
+            if(field[i][j] == 0 or isinstance(field[i][j], Plant)):
+                x = random.choices([0, Plant()], g)[0]
                 field[i][j] = x
+                
     field = herbivores_behavior(field)
     field = predators_behavior(field, iterations)
-    time.sleep(0.5)
     return field
 
 def herbivores_behavior(field):
     for i in range(len(field)):
         for j in range(len(field[i])):
-            if(field[i][j] == 1):
+            if(isinstance(field[i][j], Herbivore)):
                 #Top cell
                 if(i - 1 < 0): t_cell = 0
                 else: t_cell = i-1
@@ -69,19 +83,19 @@ def herbivores_behavior(field):
                 for k in range(t_cell, b_cell):
                     for l in range(l_cell, r_cell):
                         if (i, j) != (k, l):
-                            if(field[k][l] == 3): plants += 1
-                            elif(field[k][l] == 1): herbivorous += 1
+                            if(isinstance(field[k][l], Plant)): plants += 1
+                            elif(isinstance(field[k][l], Herbivore)): herbivorous += 1
                 if herbivorous >= 1 and plants >= 4:
                     plants =4
                     herbivorous = 1
                     x = random.randrange(t_cell, b_cell)
                     y =  random.randrange(l_cell, r_cell)
                     while plants or herbivorous:
-                        if((field[x][y] == 3) and plants):
+                        if(isinstance(field[x][y], Plant) and plants):
                             field[x][y] = 0
                             plants -= 1
                         elif((field[x][y] == 0) and herbivorous):
-                            field[x][y] = 1
+                            field[x][y] = Herbivore()
                             herbivorous -= 1
                         x = random.randrange(t_cell, b_cell)
                         y = random.randrange(l_cell, r_cell)
@@ -97,7 +111,7 @@ def predators_behavior(field, iterations):
             eaten[i].append([False, 0])
     for i in range(len(field)):
         for j in range(len(field[i])):
-            if(field[i][j] == 2):
+            if(isinstance(field[i][j], Animal)):
                 #Top cell
                 if(i - 2 < 0): t_cell = 0
                 else: t_cell = i - 2
@@ -110,15 +124,17 @@ def predators_behavior(field, iterations):
                 #Left cell
                 if(j - 2 < 0): l_cell = 0
                 else: l_cell = j - 2
-
+                #print("in i = {}, j={}: {} --- {} --- {} ---- {}".format(i, j, t_cell, r_cell, b_cell, l_cell))
                 predators = 0
                 herbivorous = 0
                 eaten[i][j] = [False, iterations]
                 for k in range(t_cell, b_cell):
                     for l in range(l_cell, r_cell):
                         if (i, j) != (k, l):
-                            if(field[k][l] == 2): predators += 1
-                            elif(field[k][l] == 1): herbivorous += 1
+                            if(isinstance(field[k][l], Animal)): predators += 1
+                            elif(isinstance(field[k][l], Herbivore)): herbivorous += 1
+                #print("{} ---- {}".format(predators, herbivorous))
+                
                 if(herbivorous >= 1):
                     herbivorous_in_A = 1
                     eaten[i][j] = [True, iterations]
@@ -127,15 +143,17 @@ def predators_behavior(field, iterations):
                     x = random.randrange(t_cell, b_cell)
                     y = random.randrange(l_cell, r_cell)
                     while(herbivorous_in_A != 0):
-                        if(field[x][y] == 1 and herbivorous_in_A):
-                            if(herbivorous_in_A == 2): field[x][y] = 2
+                        if(isinstance(field[x][y], Herbivore) and herbivorous_in_A):
+                            if(herbivorous_in_A == 2): 
+                                field[x][y] = Animal()
                             else: field[x][y] = 0
                             herbivorous_in_A -= 1
                         x = random.randrange(t_cell, b_cell)
                         y = random.randrange(l_cell, r_cell)
+                        #print("x = {} ---- y = {}".format(x, y))
                 if(not eaten[i][j][0]):
                     if(eaten[i][j][1] > 5):
-                        field[i][j] = 3
+                        field[i][j] = Plant()
                     else:
                         m_top = 0 if i - 2 < 0 else i - 2
                         m_bottom = len(field) if i + 3 >= len(field) else i + 3
@@ -145,7 +163,7 @@ def predators_behavior(field, iterations):
                         for m in range(m_top, m_bottom):
                             for n in range(m_left, m_right):
                                 if (i, j) != (m, n):
-                                    if field[m][n] == 1:
+                                    if isinstance(field[i][j], Herbivore):
                                         all_herbivorous.append((m, n))
                         lengths = []
                         if(len(all_herbivorous) > 0):
@@ -160,17 +178,18 @@ def predators_behavior(field, iterations):
                                 for m in range(t_close, b_close):
                                     for n in range(l_close, r_close):
                                         if field[m][n] == 0:
-                                            field[m][n] = 2
+                                            field[m][n] = Animal()
                                             field[i][j] = 0
             else:
                 continue
     return field
+
 def print_iter(field, n):
     print("Borad number {0}: ".format(n+1))
-    for i in range(len(field)):
-        for j in range(len(field[i])):
-            print("[{0}]".format(field[i][j]), end='')
-        print()
-    print()
+    v.set_entities(field)
+    print(v)
+    time.sleep(3)
+    v.clear()
+    
 
 exec_iteration(field, iterations, g)

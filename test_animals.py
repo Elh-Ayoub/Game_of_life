@@ -1,7 +1,7 @@
 import unittest
 from animals import Animal
 
-class TestInit(unittest.TestCase):
+class TestAnimal(unittest.TestCase):
     animal = Animal()
     def test(self):
         self.assertRaises(TypeError, Animal, True)

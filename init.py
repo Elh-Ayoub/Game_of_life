@@ -1,9 +1,18 @@
 import random
 import csv
 from __init__ import updateField
+from visualizer import Visualizer
 
 width = int(input('Input board width: '))
 height = int(input('Input board height: '))
+
+herbivores_symbol = input("Input herbivores symbol: ")
+animals_symbol = input("Input animals symbol: ")
+plants_symbol = input("Input plants symbol: ")
+
+with open('symbols.csv','w+') as symbols_csv:
+        csvsymbolsWriter = csv.writer(symbols_csv, delimiter=',')
+        csvsymbolsWriter.writerow([herbivores_symbol if(herbivores_symbol != "") else "1", animals_symbol if(animals_symbol != "") else "2", plants_symbol if(plants_symbol != "") else "3"])
 
 def initialize_field(w, h):
     rectangular = []
@@ -16,17 +25,10 @@ def initialize_field(w, h):
 field = initialize_field(width, height)
 
 def print_field(field):
-    w_str = ""
     print("-- Game board --")
-    for i in range(len(field)):
-        for j in range(len(field[i])):
-            w_str += "[" + str(field[i][j]) + "]"
-        w_str += "\n"
-    print(w_str)
-    with open('board.csv','w+') as my_csv:
-        csvWriter = csv.writer(my_csv, delimiter=',')
-        csvWriter.writerows(field)
-    return w_str
+    v = Visualizer()
+    v.set_entities(field)
+    print(v)
 
 print_field(field)
 updateField(field)
