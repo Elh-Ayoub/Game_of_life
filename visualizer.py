@@ -8,9 +8,7 @@ class Visualizer:
         self.collection = df
     
     def __str__(self):
-        df = pd.read_csv('board.csv', header=None,index_col=False)
-        # self.clear()
-        return df.to_string()
+        return pd.DataFrame(self.collection).to_string()
 
     def set_entities(self, ent_collection):
         if(ent_collection and isinstance(ent_collection, list)):
