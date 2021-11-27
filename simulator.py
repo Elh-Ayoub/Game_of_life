@@ -21,7 +21,7 @@ class Simulator:
         exec_iteration(self.visualizer.collection, 1, self.g, self, self.visualizer)
 
     def clear(self):
-        field = list(self.visualizer.collection)
+        field = self.visualizer.collection
         for i in range(len(field)):
             for j in range(len(field[i])):
                 if(field[i][j] != 0 and field[i][j].isDead()):

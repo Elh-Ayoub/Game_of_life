@@ -37,13 +37,21 @@ def read_csv():
                     elif((ele) == plants_symbol): field[i].append(Plant())
                 i += 1
     return field
-field = read_csv()
-v = Visualizer()
-v.set_entities(field)
+field1 = read_csv()
+field2 = field1
+v1 = Visualizer()
+v2 = Visualizer()
+v1.set_entities(field1)
+v2.set_entities(field2)
 g = (g_0, g_3)
-simulator = Simulator(v, g)
+simulator1 = Simulator(v1, g)
+simulator2 = Simulator(v2, g)
 
 if(not math.isclose(sum(g[:]), 1.0)):
     raise ValueError('Distribution must be exact for these probabilities')
-
-exec_iteration(field, iterations, g, simulator, v)
+print("--- M1 ---")
+time.sleep(0.5)
+exec_iteration(field1, iterations, g, simulator1, v1)
+print("--- M2 ---")
+time.sleep(0.5)
+exec_iteration(field2, iterations, g, simulator2, v2)
